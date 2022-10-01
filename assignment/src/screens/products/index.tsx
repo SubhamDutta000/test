@@ -13,6 +13,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import {
   FlatList,
   Image,
+  ImageProps,
   ImageURISource,
   SafeAreaView,
   ScrollView,
@@ -23,7 +24,9 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import {addToCart, fetchProducts} from '../states/action';
+import {addToCart, fetchProducts, removeFromCart} from '../../states/action';
+import ProductCard from '../../common/productCard';
+import Loader from '../../common/loader';
 
 interface product {
   colour: string;
@@ -54,31 +57,13 @@ const Products: React.FC = () => {
     dispatch(addToCart(id));
   };
 
+  const onPressRemoveFromCart = (id: number) => {
+    dispatch(removeFromCart(id));
+  };
+
   const renderItems = (item: product) => {
     return (
-      <View style={styles.itemContainer}>
-        <Image source={{url: item.img}} style={styles.imageStyle} />
-        <View style={{flex: 0.4, marginLeft: 10}}>
-          <View style={styles.contentView}>
-            <Text>Name: </Text>
-            <Text>{item.name}</Text>
-          </View>
-          <View style={styles.contentView}>
-            <Text>Colour: </Text>
-            <Text>{item.colour}</Text>
-          </View>
-          <View style={styles.contentView}>
-            <Text>Price: </Text>
-            <Text>{item.price}</Text>
-          </View>
-          <TouchableOpacity
-            disabled={item.isAdded}
-            onPress={() => onPressAddToCart(item.id)}
-            style={[styles.button, {opacity: item.isAdded ? 0.5 : 1}]}>
-            <Text>{item.isAdded ? 'Added To Cart' : 'Add To Cart'}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+     <ProductCard item={item} onPressAddToCart={onPressAddToCart} onPressRemoveFromCart={onPressRemoveFromCart}/>
     );
   };
 
@@ -87,7 +72,16 @@ const Products: React.FC = () => {
       <FlatList
         data={states.products ? states.products.response : []}
         renderItem={({item}) => renderItems(item)}
+        ListEmptyComponent={()=>{
+          if(states.loading) return null
+          return(
+            <View style={{flex:1, justifyContent:'center',alignItems:'center'}}>
+            <Text style={{fontSize:20, fontWeight:'bold'}}>Error Fetching Product List</Text>
+          </View>
+          )
+        }}
       />
+      {states.loading && <Loader />}
     </View>
   );
 };
@@ -95,7 +89,6 @@ const Products: React.FC = () => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    marginTop: 40,
   },
   itemContainer: {
     flex: 1,

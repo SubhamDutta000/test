@@ -11,6 +11,7 @@
 import React, {type PropsWithChildren} from 'react';
 
 import {
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -28,30 +29,59 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import { Provider, useSelector, useDispatch } from 'react-redux';
-import Cart from './src/cart';
-import Products from './src/products';
-import { toggleScreen } from './src/states/action';
+import {Provider, useSelector, useDispatch} from 'react-redux';
+import Cart from './src/screens/cart';
+import Products from './src/screens/products';
+import {toggleScreen} from './src/states/action';
 import store from './src/store';
+import {cartIcon, back} from './src/images';
 
-const Section: React.FC = (props) => {
+const Section: React.FC = props => {
   const states: any = useSelector(state => {
     return state;
   });
 
   const dispatch = useDispatch();
 
-  const changeScreen = () => {
-    dispatch(toggleScreen())
+  const changeScreen = (showingCart: boolean) => {
+    dispatch(toggleScreen(showingCart));
+  };
+
+  const filterData = () =>{
+    return states.products
+    ? states.products.response.filter((item: any) => item.count > 0)
+    : []
   }
-  
+
+  const renderCartHeader = () => {
+    return (
+      <View style={styles.header}>
+        <View style={{flexDirection:'row', alignItems:'center'}}>
+          {states.showCart && <TouchableOpacity  onPress={()=>changeScreen(false)}>
+            <Image
+              source={back}
+              style={styles.backIcon}
+              resizeMode={'contain'}
+            />
+          </TouchableOpacity>}
+          <Text style={styles.cartHeaderText}>{states.showCart ? 'Cart Details': 'Product Details'}</Text>
+        </View>
+        {!states.showCart && <TouchableOpacity style={{alignItems:'center',justifyContent:'center'}} onPress={()=>changeScreen(true)}>
+          <Image
+            source={cartIcon}
+            style={[styles.cartIcon,{tintColor: filterData().length > 0? 'green':'black'}]}
+            resizeMode={'contain'}
+          />
+        </TouchableOpacity>}
+      </View>
+    );
+  };
+
   return (
-    <View style={{flex:1}}>
-       <TouchableOpacity style={styles.cart} onPress={changeScreen}>
-            <Text>{states.showCart?'PRODUCT':'CART'}</Text>
-        </TouchableOpacity>
-        {states.showCart? <Cart/> :<Products />}
-        {/* <Products/> */}
+    <View style={{flex: 1, backgroundColor:'white'}}>
+      {renderCartHeader()}
+      {states.showCart ? <Cart /> : <Products />}
+      {/* <Products/> */}
     </View>
   );
 };
@@ -65,11 +95,11 @@ const App = () => {
 
   return (
     <Provider store={store}>
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
-        />
-        <Section />
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={backgroundStyle.backgroundColor}
+      />
+      <Section />
     </Provider>
   );
 };
@@ -91,15 +121,30 @@ const styles = StyleSheet.create({
   highlight: {
     fontWeight: '700',
   },
-  cart:{
-    backgroundColor:'yellow',
-    borderWidth:1,
-    alignSelf:'flex-end',
-    marginRight:20,
-    paddingHorizontal:20,
-    paddingVertical:5,
-    marginTop:40
-}
+  cartIcon: {
+    width: 20,
+    height: 20,
+  },
+  backIcon: {
+    width: 40,
+    height: 20,
+  },
+  header:{
+    flexDirection:'row',
+    alignItems:'center',
+    paddingRight: 20,
+    marginTop: 40,
+    justifyContent:'space-between',
+    borderBottomWidth:1,
+    borderColor:'rgba(0,0,0,0.2)',
+    paddingBottom:10
+  },
+  cartHeaderText:{
+    fontSize:20,
+    fontWeight:'600',
+    marginLeft:10
+  }
+
 });
 
 export default App;

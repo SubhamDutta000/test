@@ -6,7 +6,8 @@ import {
     FETCH_PRODUCT_ERROR,
     ADD_TO_CART,
     INCREASE_COUNT,
-    CHANGE_SCREEN
+    CHANGE_SCREEN,
+    REMOVE_FROM_CART
    } from './actionType';
 
 export const fetchProducts: any = () =>
@@ -20,7 +21,7 @@ export const fetchProducts: any = () =>
 export const addToCart = (id: number) =>{
     return{
         type: ADD_TO_CART,
-        payload: id
+        payload: {id}
     }
 }
 
@@ -32,8 +33,16 @@ export const increaseCount = (id: number, add: boolean) =>{
 }
 
 
-export const toggleScreen = () =>{
+export const toggleScreen = (showCart: boolean) =>{
     return{
         type: CHANGE_SCREEN,
+        payload: showCart
+    }
+}
+
+export const removeFromCart = (id: number) =>{
+    return{
+        type: REMOVE_FROM_CART,
+        payload: {id}
     }
 }
